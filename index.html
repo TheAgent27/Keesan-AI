@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>🌾 Kisaan AI</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&family=Noto+Sans+Devanagari:wght@400;700&family=Noto+Sans:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#2e7d32" />
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Noto Sans', 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 20px 16px;
+      background: #1a2a1a;
+      background-image: url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1600&q=80');
+      background-size: cover;
+      background-position: center;
+      background-attachment: scroll;
+      background-repeat: no-repeat;
+      position: relative;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 0;
+    }
+    .app {
+      max-width: 480px;
+      width: 100%;
+      position: relative;
+      z-index: 1;
+      transition: all 0.3s;
+    }
+    .app.rtl {
+      direction: rtl;
+      font-family: 'Noto Nastaliq Urdu', 'Noto Sans', 'Segoe UI', system-ui, sans-serif;
+    }
+    .app.rtl .card-header { flex-direction: row-reverse; }
+    .app.rtl .input-group { flex-direction: row-reverse; }
+    .app.rtl .status-bar { flex-direction: row-reverse; }
+    .app.rtl .forecast-scroll { direction: ltr; }
+    .app.rtl .city-help { direction: rtl; }
+
+    .card {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-radius: 28px;
+      padding: 24px 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 18px;
+      font-weight: 600;
+      color: #1e3a1e;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .card-header .left { display: flex; align-items: center; gap: 10px; }
+    .card-header .right { display: flex; align-items: center; gap: 8px; }
+    .card-header span { font-size: 24px; }
+    .card-header .edit-name-btn, .card-header .refresh-btn {
+      background: none;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      color: #2e7d32;
+      opacity: 0.6;
+      padding: 4px 10px;
+      border-radius: 30px;
+      transition: 0.2s;
+      font-weight: 600;
+    }
+    .card-header .edit-name-btn:hover, .card-header .refresh-btn:hover { opacity: 1; background: #e8f5e9; }
+
+    .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .app-header .brand h1 {
+      font-size: 26px;
+      font-weight: 800;
+      color: #ffffff;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    }
+    .app-header .brand h1 span { color: #a5d6a7; }
+    .app-header .brand small {
+      font-size: 13px;
+      color: #c8e6c9;
+      font-weight: 500;
+      display: block;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    }
+    .lang-selector select {
+      padding: 8px 14px;
+      border-radius: 40px;
+      border: 2px solid rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(4px);
+      font-size: 14px;
+      font-weight: 600;
+      color: #1e3a1e;
+      outline: none;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .search-box { display: flex; gap: 10px; flex-wrap: wrap; }
+    .search-box input {
+      flex: 2; min-width: 150px; padding: 14px 18px;
+      border: 2px solid #dde8d5; border-radius: 60px; font-size: 16px;
+      background: #f8fbf6; outline: none; font-family: inherit;
+    }
+    .search-box input:focus { border-color: #2e7d32; background: #fff; }
+    .search-box button {
+      flex: 1; min-width: 80px; padding: 14px 18px;
+      background: #2e7d32; color: white; border: none; border-radius: 60px;
+      font-weight: 700; font-size: 15px; cursor: pointer; font-family: inherit;
+    }
+    .search-box button:hover { background: #1b5e20; transform: scale(0.97); }
+
+    /* NEW: City Help Box */
+    .city-help {
+      background: rgba(255, 243, 224, 0.9);
+      border-left: 4px solid #ffb300;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      color: #4e342e;
+      margin-top: 10px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      backdrop-filter: blur(4px);
+    }
+    .city-help.show { display: flex; }
+    .city-help .icon { font-size: 18px; }
+
+    .input-group { display: flex; gap: 12px; align-items: flex-end; margin-top: 6px; }
+    .input-group textarea {
+      flex: 1; padding: 14px 16px; border: 2px solid #dde8d5; border-radius: 24px;
+      font-size: 15px; font-family: inherit; resize: vertical; min-height: 70px;
+      background: #f8fbf6; outline: none; line-height: 1.6;
+    }
+    .input-group textarea:focus { border-color: #2e7d32; background: #fff; }
+    .mic-btn {
+      background: #2e7d32; color: white; border: none; width: 56px; height: 56px;
+      border-radius: 50%; font-size: 26px; cursor: pointer; flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .mic-btn.listening { background: #c62828; animation: pulse 1s infinite; }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(198, 40, 40, 0.5); }
+      100% { box-shadow: 0 0 0 18px rgba(198, 40, 40, 0); }
+    }
+    .analyze-btn {
+      width: 100%; padding: 16px;
+      background: linear-gradient(145deg, #2e7d32, #1b5e20);
+      color: white; border: none; border-radius: 60px; font-size: 18px;
+      font-weight: 700; cursor: pointer; margin-top: 16px; font-family: inherit;
+    }
+    .analyze-btn:active { transform: scale(0.97); }
+
+    .forecast-scroll {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding: 8px 0 16px;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+    .forecast-scroll::-webkit-scrollbar { height: 4px; }
+    .forecast-scroll::-webkit-scrollbar-thumb { background: #a5d6a7; border-radius: 10px; }
+    .day-card {
+      flex: 0 0 70px;
+      scroll-snap-align: start;
+      background: rgba(244, 250, 242, 0.9);
+      border-radius: 18px;
+      padding: 12px 6px;
+      text-align: center;
+      border: 1px solid #e3f0df;
+      min-width: 60px;
+    }
+    .day-card .day { font-weight: 700; font-size: 12px; color: #1e3a1e; }
+    .day-card .emoji { font-size: 24px; display: block; margin: 4px 0; }
+    .day-card .temps { font-size: 12px; font-weight: 600; }
+    .day-card .high { color: #c62828; }
+    .day-card .low { color: #1565c0; margin-left: 4px; }
+    .day-card .rain-mm { font-size: 10px; color: #1565c0; font-weight: 500; background: #e3f0fd; padding: 2px 6px; border-radius: 12px; display: inline-block; margin-top: 3px; }
+
+    .current-weather {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      flex-wrap: wrap;
+      background: rgba(232, 245, 233, 0.9);
+      border-radius: 20px;
+      padding: 16px 10px;
+      margin-bottom: 12px;
+    }
+    .current-item { text-align: center; }
+    .current-item .big-emoji { font-size: 42px; }
+    .current-item .label { font-size: 13px; color: #2e5a2e; font-weight: 500; }
+    .current-item .value { font-size: 20px; font-weight: 700; color: #1b3a1b; }
+    .today-highlow { font-size: 14px; font-weight: 600; color: #1b3a1b; background: rgba(255,255,255,0.5); padding: 4px 12px; border-radius: 40px; display: inline-block; margin-top: 4px; }
+
+    #adviceBox {
+      display: none;
+      background: rgba(241, 248, 233, 0.95);
+      backdrop-filter: blur(4px);
+      padding: 20px;
+      border-radius: 24px;
+      border-left: 6px solid #2e7d32;
+      margin-top: 16px;
+    }
+    .app.rtl #adviceBox { border-left: none; border-right: 6px solid #2e7d32; }
+    #adviceBox .crop-name { font-size: 26px; font-weight: 800; color: #2e7d32; }
+    #adviceBox .advice-text { font-size: 16px; line-height: 1.8; margin-top: 8px; white-space: pre-line; }
+    #adviceBox .badge { display: inline-block; background: #2e7d32; color: white; padding: 4px 16px; border-radius: 40px; font-size: 13px; margin-top: 10px; }
+    #adviceBox .greeting-name { font-size: 20px; font-weight: 700; color: #1b5e20; margin-bottom: 6px; }
+
+    .status-bar {
+      background: rgba(240, 240, 240, 0.9);
+      backdrop-filter: blur(4px);
+      padding: 10px 16px;
+      border-radius: 40px;
+      font-size: 14px;
+      color: #333;
+      margin: 12px 0 4px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .status-bar .spinner { display: none; width: 18px; height: 18px; border: 3px solid #ccc; border-top: 3px solid #2e7d32; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .footnote { text-align: center; font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 16px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 16px; text-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+    #cityStatus { margin-top: 8px; font-size: 13px; color: #2e4a2e; }
+
+    .radar-frame {
+      width: 100%;
+      height: 300px;
+      border: none;
+      border-radius: 20px;
+      margin-top: 12px;
+      overflow: hidden;
+      background: #0a1a2a;
+    }
+
+    /* MODALS */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-card {
+      background: #ffffff;
+      border-radius: 40px;
+      max-width: 400px;
+      width: 100%;
+      padding: 30px 24px;
+      text-align: center;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+      animation: fadeUp 0.4s ease;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .modal-card .icon { font-size: 64px; margin-bottom: 10px; }
+    .modal-card h2 { font-size: 24px; color: #1b5e20; margin-bottom: 8px; }
+    .modal-card p { font-size: 16px; color: #444; line-height: 1.6; margin-bottom: 20px; }
+    .modal-card input {
+      width: 100%; padding: 14px 18px; margin-bottom: 12px;
+      border: 2px solid #dde8d5; border-radius: 60px; font-size: 16px;
+      outline: none; font-family: inherit;
+    }
+    .modal-card input:focus { border-color: #2e7d32; }
+    .modal-card button {
+      width: 100%; padding: 16px;
+      background: #2e7d32; color: white; border: none; border-radius: 60px;
+      font-weight: 700; font-size: 18px; cursor: pointer; font-family: inherit;
+    }
+    .modal-card button:hover { background: #1b5e20; }
+
+    /* TUTORIAL OVERLAY */
+    #tutorialOverlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      z-index: 9998;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(2px);
+      pointer-events: none;
+    }
+    #tutorialOverlay.active { display: block; }
+    .tutorial-highlight {
+      position: absolute;
+      border-radius: 16px;
+      box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.7);
+      background: transparent;
+      transition: all 0.4s ease;
+      z-index: 10000;
+      pointer-events: none;
+    }
+    .tutorial-tooltip {
+      position: absolute;
+      background: #2e7d32;
+      color: white;
+      padding: 16px 20px;
+      border-radius: 20px;
+      max-width: 280px;
+      font-size: 15px;
+      line-height: 1.5;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      z-index: 10001;
+      pointer-events: auto;
+      font-family: 'Noto Sans', sans-serif;
+    }
+    .app.rtl .tutorial-tooltip { font-family: 'Noto Nastaliq Urdu', 'Noto Sans', sans-serif; }
+    .tutorial-tooltip .title { font-weight: 700; font-size: 17px; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+    .tutorial-tooltip .buttons { display: flex; justify-content: flex-end; gap: 10px; margin-top: 12px; }
+    .tutorial-tooltip .buttons button { padding: 8px 18px; border: none; border-radius: 40px; font-weight: 700; font-size: 14px; cursor: pointer; pointer-events: auto; font-family: inherit; }
+    .tutorial-tooltip .btn-skip { background: rgba(255,255,255,0.2); color: white; }
+    .tutorial-tooltip .btn-next { background: white; color: #2e7d32; }
+    .tutorial-tooltip .btn-next:hover { background: #e8f5e9; }
+    .tutorial-arrow-svg {
+      position: absolute;
+      z-index: 10002;
+      pointer-events: none;
+      width: 40px;
+      height: 40px;
+      transition: all 0.4s ease;
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAME MODAL -->
+<div class="modal-overlay" id="nameModal">
+  <div class="modal-card">
+    <div class="icon">🧑‍🌾</div>
+    <h2>Welcome to Kisaan AI!</h2>
+    <p>Please tell us your name so we can personalize your farming advice.</p>
+    <input type="text" id="firstNameInput" placeholder="First Name (e.g. Ahmed)" />
+    <input type="text" id="lastNameInput" placeholder="Last Name (e.g. Khan)" />
+    <button id="saveNameBtn">🌾 Start Farming</button>
+  </div>
+</div>
+
+<!-- TUTORIAL UI -->
+<div id="tutorialOverlay">
+  <div class="tutorial-highlight" id="tutorialHighlight"></div>
+  <div class="tutorial-arrow-svg" id="tutorialArrow">
+    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 35 L2 10 L20 20 L38 10 L20 35Z" fill="#FFD54F" stroke="#2e7d32" stroke-width="2"/>
+      <path d="M20 35 L20 20" stroke="#2e7d32" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <div class="tutorial-tooltip" id="tutorialTooltip">
+    <div class="title" id="tutTitle">📍 Step 1</div>
+    <div id="tutDesc">Search for your city to load the live weather.</div>
+    <div class="buttons">
+      <button class="btn-skip" id="tutSkip">Skip</button>
+      <button class="btn-next" id="tutNext">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="app" id="appContainer">
+
+  <div class="app-header">
+    <div class="brand">
+      <h1>🌾 <span>Kisaan</span> AI</h1>
+      <small id="appSubtitle">Smart Farming Assistant</small>
+    </div>
+    <div class="lang-selector">
+      <select id="langSelect">
+        <option value="en">🇬🇧 English</option>
+        <option value="ur">🇵🇰 اردو (Urdu)</option>
+        <option value="pa">🇵🇰 پنجابی (Punjabi)</option>
+        <option value="sd">🇵🇰 سنڌي (Sindhi)</option>
+        <option value="bal">🇵🇰 بلوچی (Balochi)</option>
+        <option value="hi">🇮🇳 हिन्दी (Hindi)</option>
+        <option value="ru">🇷🇺 Русский (Russian)</option>
+        <option value="ar">🇸🇦 العربية (Arabic)</option>
+        <option value="bn">🇧🇩 বাংলা (Bengali)</option>
+        <option value="es">🇪🇸 Español</option>
+        <option value="fr">🇫🇷 Français</option>
+        <option value="de">🇩🇪 Deutsch</option>
+        <option value="it">🇮🇹 Italiano</option>
+        <option value="pt">🇵🇹 Português</option>
+        <option value="ja">🇯🇵 日本語</option>
+        <option value="zh">🇨🇳 中文</option>
+        <option value="tr">🇹🇷 Türkçe</option>
+        <option value="ko">🇰🇷 한국어</option>
+        <option value="nl">🇳🇱 Nederlands</option>
+        <option value="pl">🇵🇱 Polski</option>
+        <option value="uk">🇺🇦 Українська</option>
+        <option value="vi">🇻🇳 Tiếng Việt</option>
+        <option value="th">🇹🇭 ไทย</option>
+        <option value="id">🇮🇩 Bahasa Indonesia</option>
+        <option value="ms">🇲🇾 Bahasa Melayu</option>
+        <option value="sw">🇰🇪 Kiswahili</option>
+        <option value="ha">🇳🇬 Hausa</option>
+        <option value="fa">🇮🇷 فارسی (Persian)</option>
+        <option value="ps">🇦🇫 پښتو (Pashto)</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- CITY SEARCH -->
+  <div class="card" id="step1Card">
+    <div class="card-header"><span>📍</span> <span id="cityLabel">Select Your City</span></div>
+    <div class="search-box">
+      <input type="text" id="cityInput" placeholder="e.g. Karachi, Lahore..." autocomplete="off" />
+      <button id="searchCityBtn">🔍 <span id="searchBtnText">Search</span></button>
+    </div>
+    <div id="cityStatus">💡 Type a city (ECMWF model).</div>
+    <!-- NEW: City Help Box -->
+    <div class="city-help" id="cityHelpBox">
+      <span class="icon">💡</span>
+      <span id="cityHelpText">Can't find your village? Type the nearest major city (e.g., Gharo → Karachi).</span>
+    </div>
+  </div>
+
+  <!-- FARMER INPUT -->
+  <div class="card" id="step2Card">
+    <div class="card-header">
+      <span>🧑‍🌾</span> <span id="landLabel">Tell us about your land</span>
+      <button class="edit-name-btn" id="editNameBtn" title="Change your name">✏️</button>
+    </div>
+    <div class="input-group">
+      <textarea id="userQuery" placeholder="e.g. I have 5 acres of sandy soil...">I have sandy soil and 5 acres.</textarea>
+      <button class="mic-btn" id="micBtn">🎤</button>
+    </div>
+    <button class="analyze-btn" id="analyzeBtn">🌱 <span id="analyzeBtnText">Get AI Crop Advice</span></button>
+  </div>
+
+  <!-- STATUS -->
+  <div class="status-bar" id="statusBar">
+    <span id="statusIcon">💡</span>
+    <span id="statusText">Waiting for your input...</span>
+    <div class="spinner" id="statusSpinner"></div>
+  </div>
+
+  <!-- WEATHER -->
+  <div class="card" id="weatherCard" style="display: none;">
+    <div class="card-header">
+      <div class="left"><span>🌤️</span> <span id="weatherTitle">Live Weather &amp; 15-Day Forecast</span></div>
+      <div class="right">
+        <button class="refresh-btn" id="refreshWeatherBtn" title="Refresh with ECMWF model">🔄 Refresh</button>
+      </div>
+    </div>
+    <div id="weatherContainer">
+      <div class="current-weather" id="currentWeather"></div>
+      <div class="forecast-scroll" id="forecastGrid"></div>
+      <iframe id="radarFrame" class="radar-frame" src="" allowfullscreen loading="lazy"></iframe>
+    </div>
+  </div>
+
+  <!-- ADVICE -->
+  <div id="adviceBox">
+    <div class="greeting-name" id="greetingName">👋 Hello, Farmer!</div>
+    <div class="crop-name" id="adviceCrop">🌱 Crop</div>
+    <div class="advice-text" id="adviceText">Advice here...</div>
+    <span class="badge" id="adviceSoil">🧑‍🌾 Soil: Loamy</span>
+  </div>
+  <div class="footnote">🌾 Powered by ECMWF (Hourly Rain Summation) + Windy Satellite Radar.</div>
+</div>
+
+<script>
+  // =============================================================
+  // 1. CLICK SOUND
+  // =============================================================
+  function playClickSound() {
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      oscillator.type = 'sine';
+      oscillator.frequency.value = 800;
+      gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      oscillator.start();
+      oscillator.stop(audioCtx.currentTime + 0.08);
+    } catch (e) { /* silent */ }
+  }
+  document.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', playClickSound);
+  });
+
+  // =============================================================
+  // 2. TRANSLATIONS (FULLY UPDATED WITH NEW FEATURES)
+  // =============================================================
+  const LANG_DATA = {
+    en: { name:'English', tts:'en-US', dir:'ltr',
+      days: ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
+      crops: { 'Wheat':'Wheat', 'Cotton':'Cotton', 'Rice':'Rice', 'Maize':'Maize', 'Millet':'Millet' },
+      soils: { 'sandy':'Sandy', 'clay':'Clay', 'loamy':'Loamy' },
+      seasons: { 'Kharif':'Kharif (Monsoon)', 'Rabi':'Rabi (Winter)' },
+      weather: { temp:'Temp', wind:'Wind', humidity:'Humidity', todayHigh:'Today\'s High', low:'Low', now:'Now' },
+      ui: { 
+        subtitle:'Smart Farming Assistant', 
+        cityLabel:'Select Your City', 
+        cityPlaceholder:'e.g. Karachi, Lahore...', 
+        searchBtn:'Search', 
+        cityStatusHint:'💡 Type a city (ECMWF model).', 
+        cityHelp:'💡 Can\'t find your village? Type the nearest major city (e.g., Gharo → Karachi).',
+        landLabel:'Tell us about your land', 
+        landPlaceholder:'e.g. I have 5 acres of sandy soil...', 
+        analyzeBtn:'Get AI Crop Advice', 
+        weatherTitle:'Live Weather & 15-Day Forecast', 
+        statusWaiting:'Waiting for your input...', 
+        statusFetching:'Fetching weather (ECMWF)...', 
+        statusLoaded:'✅ Weather loaded! Click "Get AI Advice".', 
+        statusAdviceReady:'✅ Advice ready! Scroll down.', 
+        soilBadge:'🧑‍🌾 Soil: {soil}', 
+        cropLabel:'🌱 Best Crop: {crop}', 
+        greeting:'👋 Hello, {name}!' 
+      },
+      advice: { 
+        tempLabel:'📊 Today\'s High: {temp}°C | Soil: {soil}.', 
+        rainAlert:'☔ **Rain Alert! {totalRain}mm expected over the next 3 days ({rainDays} day(s)).**', 
+        rainDoNot:'➡️ DO NOT water your fields. Let nature irrigate.', 
+        rainAvoid:'➡️ Avoid spraying pesticides until 48 hours after the rain stops.', 
+        dryAdvise:'☀️ **Dry conditions ahead (only {totalRain}mm rain expected).**', 
+        dryIrrigate:'➡️ Irrigate your fields deeply tomorrow morning.', 
+        dryFertilize:'➡️ Perfect time to apply dry fertilizer and prepare the beds.', 
+        roadDry:'🛣️ Roads are dry and safe for travel.',
+        roadWet:'⚠️ Heavy rain (>50mm) expected! Roads may flood. Drive cautiously!',
+        cropSeason:'🌾 This is a {season} crop.',
+        proTip:'💡 **Pro Tip**: {crop} thrives in {soil} soil at this temperature. Check the 15-day forecast above for exact daily rain amounts.' 
+      }
+    },
+    ur: { name:'Urdu', tts:'ur-PK', dir:'rtl',
+      days: ['اتوار','پیر','منگل','بدھ','جمعرات','جمعہ','ہفتہ'],
+      crops: { 'Wheat':'گندم', 'Cotton':'کپاس', 'Rice':'چاول', 'Maize':'مکئی', 'Millet':'باجرہ' },
+      soils: { 'sandy':'ریتلی', 'clay':'چکنی', 'loamy':'لومی' },
+      seasons: { 'Kharif':'خریف (برسات)', 'Rabi':'ربیع (سردیوں)' },
+      weather: { temp:'درجہ حرارت', wind:'ہوا', humidity:'نمی', todayHigh:'آج کا زیادہ', low:'کم', now:'ابھی' },
+      ui: { 
+        subtitle:'ذہین کسان معاون', 
+        cityLabel:'اپنا شہر منتخب کریں', 
+        cityPlaceholder:'مثال: کراچی، لاہور...', 
+        searchBtn:'تلاش کریں', 
+        cityStatusHint:'💡 شہر ٹائپ کریں (ECMWF ماڈل)۔', 
+        cityHelp:'💡 اپنا گاؤں نہیں مل رہا؟ قریبی بڑا شہر لکھیں (مثال: گھارو → کراچی)۔',
+        landLabel:'ہمیں اپنی زمین کے بارے میں بتائیں', 
+        landPlaceholder:'مثال: میرے پاس 5 ایکڑ ریتلی زمین ہے...', 
+        analyzeBtn:'اے آئی مشورہ حاصل کریں', 
+        weatherTitle:'موجودہ موسم اور 15 روزہ پیش گوئی', 
+        statusWaiting:'آپ کے انٹرنٹ کا انتظار...', 
+        statusFetching:'لائیو موسم ڈیٹا لایا جا رہا ہے (ECMWF)...', 
+        statusLoaded:'✅ موسم لوڈ ہو گیا! "اے آئی مشورہ" دبائیں۔', 
+        statusAdviceReady:'✅ مشورہ تیار! نیچے دیکھیں۔', 
+        soilBadge:'🧑‍🌾 مٹی: {soil}', 
+        cropLabel:'🌱 بہترین فصل: {crop}', 
+        greeting:'👋 السلام علیکم، {name}!' 
+      },
+      advice: { 
+        tempLabel:'📊 آج کا زیادہ درجہ حرارت: {temp}°C | مٹی: {soil}۔', 
+        rainAlert:'☔ **بارش کا الرٹ! اگلے 3 دنوں میں {totalRain}ملی میٹر بارش متوقع ہے ({rainDays} دن)**', 
+        rainDoNot:'➡️ اپنے کھیتوں کو پانی نہ دیں۔ قدرت کو سیراب کرنے دیں۔', 
+        rainAvoid:'➡️ بارش رکنے کے 48 گھنٹے بعد تک کیڑے مار ادویات کا سپرے نہ کریں۔', 
+        dryAdvise:'☀️ **خشک موسم (صرف {totalRain}ملی میٹر بارش متوقع)**', 
+        dryIrrigate:'➡️ کل صبح اپنے کھیتوں کو گہرا پانی دیں۔', 
+        dryFertilize:'➡️ خشک کھاد ڈالنے اور کھیت تیار کرنے کا بہترین وقت ہے۔',
+        roadDry:'🛣️ سڑکیں خشک اور سفر کے لیے محفوظ ہیں۔',
+        roadWet:'⚠️ زبردست بارش (>50mm) متوقع! سڑکوں پر پانی بھر سکتا ہے۔ احتیاط سے ڈرائیو کریں!',
+        cropSeason:'🌾 یہ {season} کی فصل ہے۔',
+        proTip:'💡 **ماہر مشورہ**: {crop} اس درجہ حرارت پر {soil} مٹی میں اچھی پھلتی ہے۔ درست روزانہ بارش کی مقدار کے لیے اوپر 15 روزہ پیش گوئی دیکھیں۔' 
+      }
+    }
+  };
+  const fallbackEn = LANG_DATA['en'];
+  ['pa','sd','bal','hi','ru','ar','bn','es','fr','de','it','pt','ja','zh','tr','ko','nl','pl','uk','vi','th','id','ms','sw','ha','fa','ps'].forEach(code => {
+    if (!LANG_DATA[code]) { 
+      LANG_DATA[code] = JSON.parse(JSON.stringify(fallbackEn)); 
+      LANG_DATA[code].name = code; 
+      LANG_DATA[code].tts = 'en-US'; 
+      LANG_DATA[code].dir = 'ltr';
+      // Add Urdu-specific keys for these fallbacks to be safe (they will fall back to English anyway)
+    }
+  });
+
+  // =============================================================
+  // 3. APP STATE
+  // =============================================================
+  let currentLang = 'en';
+  let selectedLat = null, selectedLng = null;
+  let currentWeatherData = null;
+  let farmerFirstName = '';
+
+  const appContainer = document.getElementById('appContainer');
+  const langSelect = document.getElementById('langSelect');
+  const cityInput = document.getElementById('cityInput');
+  const searchBtn = document.getElementById('searchCityBtn');
+  const cityStatus = document.getElementById('cityStatus');
+  const cityHelpBox = document.getElementById('cityHelpBox');
+  const cityHelpText = document.getElementById('cityHelpText');
+  const userQuery = document.getElementById('userQuery');
+  const micBtn = document.getElementById('micBtn');
+  const analyzeBtn = document.getElementById('analyzeBtn');
+  const statusIcon = document.getElementById('statusIcon');
+  const statusText = document.getElementById('statusText');
+  const statusSpinner = document.getElementById('statusSpinner');
+  const weatherCard = document.getElementById('weatherCard');
+  const currentWeather = document.getElementById('currentWeather');
+  const forecastGrid = document.getElementById('forecastGrid');
+  const adviceBox = document.getElementById('adviceBox');
+  const adviceCrop = document.getElementById('adviceCrop');
+  const adviceText = document.getElementById('adviceText');
+  const adviceSoil = document.getElementById('adviceSoil');
+  const greetingName = document.getElementById('greetingName');
+  const radarFrame = document.getElementById('radarFrame');
+  const refreshBtn = document.getElementById('refreshWeatherBtn');
+
+  function getLangData() { return LANG_DATA[currentLang] || LANG_DATA['en']; }
+  function getFarmerName() { return localStorage.getItem('farmerFirstName') || ''; }
+  function setFarmerName(first) { localStorage.setItem('farmerFirstName', first); farmerFirstName = first; }
+
+  function updateUI() {
+    const data = getLangData(); const ui = data.ui;
+    appContainer.classList.toggle('rtl', data.dir === 'rtl'); document.dir = data.dir;
+    document.getElementById('appSubtitle').innerText = ui.subtitle;
+    document.getElementById('cityLabel').innerText = ui.cityLabel;
+    cityInput.placeholder = ui.cityPlaceholder;
+    document.getElementById('searchBtnText').innerText = ui.searchBtn;
+    document.getElementById('landLabel').innerText = ui.landLabel;
+    userQuery.placeholder = ui.landPlaceholder;
+    document.getElementById('analyzeBtnText').innerText = ui.analyzeBtn;
+    document.getElementById('weatherTitle').innerText = ui.weatherTitle;
+    cityHelpText.innerText = ui.cityHelp;
+    if (!statusText.innerText.includes('✅') && !statusText.innerText.includes('❌') && !statusText.innerText.includes('🎙️')) {
+      statusText.innerText = ui.statusWaiting;
+    }
+    if (cityStatus.innerText.includes('Type a city') || cityStatus.innerText.includes('شہر')) {
+      cityStatus.innerText = ui.cityStatusHint;
+    }
+    const firstName = getFarmerName();
+    greetingName.innerText = ui.greeting.replace('{name}', firstName || 'Farmer');
+    if (adviceBox.style.display === 'block' && currentWeatherData) generateAdvice();
+    if (weatherCard.style.display !== 'none' && currentWeatherData) renderWeather(currentWeatherData);
+  }
+
+  // =============================================================
+  // 4. CITY HELP BOX LOGIC (Show on focus/typing)
+  // =============================================================
+  cityInput.addEventListener('focus', () => { cityHelpBox.classList.add('show'); });
+  cityInput.addEventListener('blur', () => { 
+    // Delay hiding so clicks on the help box don't break, but just hide after a second
+    setTimeout(() => { if (!cityInput.matches(':focus')) cityHelpBox.classList.remove('show'); }, 200);
+  });
+  cityInput.addEventListener('input', () => { 
+    if (cityInput.value.length > 0) cityHelpBox.classList.add('show'); 
+    else cityHelpBox.classList.remove('show');
+  });
+
+  // =============================================================
+  // 5. CROP DB & SEASONS
+  // =============================================================
+  const CROP_DB = {
+    'Wheat': { tempMin: 10, tempMax: 22, soils: ['loamy', 'clay'] },
+    'Cotton': { tempMin: 25, tempMax: 35, soils: ['sandy', 'loamy'] },
+    'Rice': { tempMin: 22, tempMax: 32, soils: ['clay', 'loamy'] },
+    'Maize': { tempMin: 18, tempMax: 28, soils: ['sandy', 'loamy'] },
+    'Millet': { tempMin: 28, tempMax: 38, soils: ['sandy'] }
+  };
+  const CROP_SEASONS = {
+    'Wheat': 'Rabi',
+    'Cotton': 'Kharif',
+    'Rice': 'Kharif',
+    'Maize': 'Kharif',
+    'Millet': 'Kharif'
+  };
+  const SOUTH_ASIAN_LANGS = ['ur','pa','sd','bal','hi','bn'];
+
+  function getWeatherEmoji(code) {
+    const map = { 0: '☀️', 1: '🌤️', 2: '⛅', 3: '☁️', 45: '🌫️', 48: '🌫️', 51: '🌦️', 53: '🌦️', 55: '🌦️', 61: '🌧️', 63: '🌧️', 65: '🌧️', 71: '❄️', 73: '❄️', 75: '❄️', 80: '🌧️', 81: '🌧️', 82: '⛈️', 95: '⛈️', 96: '⛈️', 99: '⛈️' };
+    return map[code] || '🌤️';
+  }
+
+  // =============================================================
+  // 6. FETCH WEATHER (WITH MANUAL HOURLY RAIN SUMMATION)
+  // =============================================================
+  async function searchCity(query) {
+    if (!query || query.length < 2) { cityStatus.innerText = getLangData().ui.cityStatusHint; return; }
+    statusText.innerText = 'Searching location...'; statusSpinner.style.display = 'block';
+    try {
+      const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=5&language=en&format=json`;
+      const res = await fetch(url); const json = await res.json();
+      statusSpinner.style.display = 'none';
+      if (!json.results || json.results.length === 0) { cityStatus.innerText = '❌ No cities found. Try a major city.'; return; }
+      const city = json.results[0];
+      selectedLat = city.latitude; selectedLng = city.longitude;
+      cityInput.value = `${city.name}, ${city.country}`;
+      cityStatus.innerText = `✅ Found: ${city.name}, ${city.country}`;
+      // Hide help box after finding city
+      cityHelpBox.classList.remove('show');
+      await fetchWeather(selectedLat, selectedLng);
+    } catch (e) { statusSpinner.style.display = 'none'; cityStatus.innerText = '⚠️ Network error.'; console.error(e); }
+  }
+
+  async function fetchWeather(lat, lng) {
+    if (!lat || !lng) return;
+    statusText.innerText = 'Connecting to ECMWF model...'; statusSpinner.style.display = 'block';
+    weatherCard.style.display = 'none';
+    try {
+      const baseUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min&hourly=precipitation&timezone=auto&forecast_days=16`;
+      
+      let json = await fetch(baseUrl + '&models=ecmwf').then(r => r.json());
+      if (!json.current) {
+        statusText.innerText = 'ECMWF unavailable, switching to GFS...';
+        json = await fetch(baseUrl).then(r => r.json());
+        if (!json.current) {
+          statusSpinner.style.display = 'none';
+          statusText.innerText = '⚠️ Weather service busy. Tap "Refresh".';
+          statusIcon.textContent = '⚠️';
+          return;
+        }
+      }
+
+      const dailyRainMap = {};
+      if (json.hourly && json.hourly.time && json.hourly.precipitation) {
+        const times = json.hourly.time;
+        const rains = json.hourly.precipitation;
+        for (let i = 0; i < times.length; i++) {
+          const dateStr = times[i].split('T')[0];
+          const val = rains[i] || 0;
+          dailyRainMap[dateStr] = (dailyRainMap[dateStr] || 0) + val;
+        }
+      }
+      if (json.daily && json.daily.time) {
+        if (!json._manualRain) json._manualRain = {};
+        for (let i = 0; i < json.daily.time.length; i++) {
+          const dateStr = json.daily.time[i];
+          if (dailyRainMap[dateStr] !== undefined) {
+            json._manualRain[dateStr] = dailyRainMap[dateStr];
+          }
+        }
+      }
+
+      statusSpinner.style.display = 'none';
+      currentWeatherData = json;
+      renderWeather(json);
+      weatherCard.style.display = 'block';
+      radarFrame.src = `https://embed.windy.com/embed2.html?lat=${lat}&lon=${lng}&zoom=6&level=surface&overlay=radar&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&detailLat=${lat}&detailLon=${lng}&metricWind=default&metricTemp=default&radarRange=-1`;
+      statusText.innerText = getLangData().ui.statusLoaded;
+      statusIcon.textContent = '✅';
+    } catch (e) {
+      statusSpinner.style.display = 'none';
+      statusText.innerText = '⚠️ Failed to fetch. Tap "Refresh".';
+      statusIcon.textContent = '⚠️';
+      console.error(e);
+    }
+  }
+
+  // =============================================================
+  // 7. RENDER WEATHER
+  // =============================================================
+  function renderWeather(data) {
+    const lang = getLangData();
+    const cur = data.current; const daily = data.daily;
+    const temp = cur.temperature_2m; const humidity = cur.relative_humidity_2m;
+    const wind = cur.wind_speed_10m; const code = cur.weather_code;
+    const emoji = getWeatherEmoji(code);
+    const todayHigh = Math.round(daily.temperature_2m_max[0]);
+    const todayLow = Math.round(daily.temperature_2m_min[0]);
+
+    currentWeather.innerHTML = `
+      <div class="current-item"><span class="big-emoji">${emoji}</span></div>
+      <div class="current-item">
+        <span class="label">${lang.weather.now}</span>
+        <div class="value">${Math.round(temp)}°C</div>
+        <div class="today-highlow">⬆ ${todayHigh}° ⬇ ${todayLow}°</div>
+      </div>
+      <div class="current-item"><span class="label">💨 ${lang.weather.wind}</span><div class="value">${Math.round(wind)} km/h</div></div>
+      <div class="current-item"><span class="label">💧 ${lang.weather.humidity}</span><div class="value">${Math.round(humidity)}%</div></div>
+    `;
+
+    forecastGrid.innerHTML = '';
+    const count = Math.min(daily.time.length, 16);
+    for (let i = 0; i < count; i++) {
+      const date = daily.time[i];
+      const max = Math.round(daily.temperature_2m_max[i]);
+      const min = Math.round(daily.temperature_2m_min[i]);
+      const wCode = daily.weather_code[i];
+      let rain = 0;
+      if (data._manualRain && data._manualRain[date] !== undefined) {
+        rain = data._manualRain[date];
+      }
+      const emojiDay = getWeatherEmoji(wCode);
+      const dayIndex = new Date(date + 'T00:00:00').getDay();
+      const dayName = lang.days[dayIndex] || ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dayIndex];
+      const div = document.createElement('div'); div.className = 'day-card';
+      let rainDisplay = '0.0 mm';
+      if (rain > 0) rainDisplay = rain.toFixed(1) + ' mm';
+      div.innerHTML = `<div class="day">${dayName}</div><span class="emoji">${emojiDay}</span><div class="temps"><span class="high">${max}°</span><span class="low">${min}°</span></div><div class="rain-mm">${rainDisplay}</div>`;
+      forecastGrid.appendChild(div);
+    }
+  }
+
+  // =============================================================
+  // 8. ADVICE ENGINE (FULLY UPGRADED WITH ROAD + SEASON)
+  // =============================================================
+  function generateAdvice() {
+    if (!currentWeatherData) { statusText.innerText = getLangData().ui.statusWaiting; return; }
+    const query = userQuery.value.toLowerCase();
+    if (!query) { statusText.innerText = '⚠️ Describe your land.'; return; }
+
+    let soilKey = 'loamy';
+    if (query.includes('sandy')) soilKey = 'sandy';
+    else if (query.includes('clay')) soilKey = 'clay';
+    else if (query.includes('loamy')) soilKey = 'loamy';
+
+    const daily = currentWeatherData.daily;
+    const todayHigh = daily.temperature_2m_max[0];
+    const temp = todayHigh;
+
+    let bestCropKey = 'Wheat';
+    for (const [crop, rules] of Object.entries(CROP_DB)) {
+      if (temp >= rules.tempMin && temp <= rules.tempMax && rules.soils.includes(soilKey)) {
+        bestCropKey = crop; break;
+      }
+    }
+
+    // Calculate rain over next 3 days using MANUAL sums
+    let rainDays = 0, totalRain = 0;
+    for (let i = 1; i <= 3; i++) {
+      const date = daily.time[i];
+      let rain = 0;
+      if (currentWeatherData._manualRain && currentWeatherData._manualRain[date] !== undefined) {
+        rain = currentWeatherData._manualRain[date];
+      }
+      totalRain += rain;
+      if (rain > 0.5) rainDays++;
+    }
+
+    const lang = getLangData(); 
+    const adv = lang.advice; 
+    const ui = lang.ui;
+    const cropName = lang.crops[bestCropKey] || bestCropKey;
+    const soilName = lang.soils[soilKey] || soilKey.charAt(0).toUpperCase() + soilKey.slice(1);
+    const firstName = getFarmerName() || 'Farmer';
+
+    // Start building advice
+    greetingName.innerText = ui.greeting.replace('{name}', firstName);
+    let advice = `${ui.cropLabel.replace('{crop}', cropName)}\n\n`;
+    advice += adv.tempLabel.replace('{temp}', Math.round(temp)).replace('{soil}', soilName);
+
+    // --- 1. RAIN ADVICE ---
+    if (rainDays > 0 && totalRain > 1.0) {
+      advice += `\n\n${adv.rainAlert.replace('{totalRain}', totalRain.toFixed(1)).replace('{rainDays}', rainDays)}`;
+      advice += `\n${adv.rainDoNot}`; 
+      advice += `\n${adv.rainAvoid}`;
+    } else {
+      advice += `\n\n${adv.dryAdvise.replace('{totalRain}', totalRain.toFixed(1))}`;
+      advice += `\n${adv.dryIrrigate}`; 
+      advice += `\n${adv.dryFertilize}`;
+    }
+
+    // --- 2. ROAD SAFETY ADVICE (NEW) ---
+    if (totalRain > 50) {
+      advice += `\n\n${adv.roadWet}`;
+    } else {
+      advice += `\n\n${adv.roadDry}`;
+    }
+
+    // --- 3. KHARIF / RABI CLASSIFICATION (NEW) ---
+    if (SOUTH_ASIAN_LANGS.includes(currentLang)) {
+      const seasonKey = CROP_SEASONS[bestCropKey] || '';
+      if (seasonKey) {
+        const seasonName = lang.seasons[seasonKey] || seasonKey;
+        advice += `\n\n${adv.cropSeason.replace('{season}', seasonName)}`;
+      }
+    }
+
+    // --- 4. PRO TIP ---
+    advice += `\n\n${adv.proTip.replace('{crop}', cropName).replace('{soil}', soilName)}`;
+
+    adviceCrop.textContent = `🌱 ${cropName}`;
+    adviceText.textContent = advice;
+    adviceSoil.textContent = ui.soilBadge.replace('{soil}', soilName);
+    adviceBox.style.display = 'block';
+    speakText(advice, lang.tts);
+    statusText.innerText = ui.statusAdviceReady; 
+    statusIcon.textContent = '🎯';
+  }
+
+  function speakText(text, langCode) {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = langCode || 'en-US';
+    utterance.rate = 0.85;
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function startVoice() {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      statusText.innerText = '❌ Voice not supported. Use Chrome.'; return;
+    }
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.lang = getLangData().tts;
+    recognition.interimResults = false;
+    micBtn.classList.add('listening');
+    statusText.innerText = '🎙️ Listening...'; statusIcon.textContent = '🎤';
+    recognition.start();
+    recognition.onresult = (e) => {
+      const text = e.results[0][0].transcript;
+      userQuery.value = text;
+      statusText.innerText = `🗣️ "${text}"`; statusIcon.textContent = '📝';
+      micBtn.classList.remove('listening');
+      setTimeout(generateAdvice, 400);
+    };
+    recognition.onerror = (e) => {
+      micBtn.classList.remove('listening');
+      statusText.innerText = `❌ Mic error: ${e.error}`; statusIcon.textContent = '⚠️';
+    };
+    recognition.onend = () => micBtn.classList.remove('listening');
+  }
+
+  // =============================================================
+  // 9. TUTORIAL WITH ARROWS
+  // =============================================================
+  let tutorialStep = 0;
+  const tutorialElements = [
+    { id: 'cityInput', title: '📍 Step 1', desc: 'Search for your city. If your village isn\'t here, type the nearest big city!', arrowPos: 'bottom' },
+    { id: 'userQuery', title: '🎤 Step 2', desc: 'Describe your land here (or click the Mic 🎤!).', arrowPos: 'bottom' },
+    { id: 'analyzeBtn', title: '🌱 Step 3', desc: 'Hit this green button for AI advice + road safety + crop season!', arrowPos: 'top' }
+  ];
+
+  function getElementRect(id) { const el = document.getElementById(id); if (!el) return null; return el.getBoundingClientRect(); }
+  function showTutorialStep(index) {
+    const stepData = tutorialElements[index]; if (!stepData) { closeTutorial(); return; }
+    const rect = getElementRect(stepData.id); if (!rect) { closeTutorial(); return; }
+    const overlay = document.getElementById('tutorialOverlay'); const highlight = document.getElementById('tutorialHighlight');
+    const tooltip = document.getElementById('tutorialTooltip'); const arrowSvg = document.getElementById('tutorialArrow');
+    highlight.style.top = (rect.top - 8) + 'px'; highlight.style.left = (rect.left - 8) + 'px';
+    highlight.style.width = (rect.width + 16) + 'px'; highlight.style.height = (rect.height + 16) + 'px';
+    document.getElementById('tutTitle').innerText = stepData.title; document.getElementById('tutDesc').innerText = stepData.desc;
+    const tooltipWidth = 280; let tooltipLeft = rect.left + (rect.width / 2) - (tooltipWidth / 2); let tooltipTop;
+    if (stepData.arrowPos === 'bottom') { tooltipTop = rect.bottom + 30; } else { tooltipTop = rect.top - 30 - 100; }
+    tooltipLeft = Math.max(10, Math.min(tooltipLeft, window.innerWidth - tooltipWidth - 10));
+    if (tooltipTop < 20) tooltipTop = 20; if (tooltipTop + 150 > window.innerHeight - 20) tooltipTop = window.innerHeight - 170;
+    tooltip.style.left = tooltipLeft + 'px'; tooltip.style.top = tooltipTop + 'px';
+    let arrowTop, arrowLeft;
+    if (stepData.arrowPos === 'bottom') { arrowTop = rect.bottom - 10; arrowLeft = rect.left + (rect.width / 2) - 20; } 
+    else { arrowTop = rect.top - 30; arrowLeft = rect.left + (rect.width / 2) - 20; }
+    arrowSvg.style.top = arrowTop + 'px'; arrowSvg.style.left = arrowLeft + 'px';
+    arrowSvg.style.transform = stepData.arrowPos === 'bottom' ? 'rotate(0deg)' : 'rotate(180deg)';
+    overlay.classList.add('active');
+  }
+  function closeTutorial() { document.getElementById('tutorialOverlay').classList.remove('active'); localStorage.setItem('kisaanTutorialShown', 'true'); }
+  document.getElementById('tutNext').addEventListener('click', () => { tutorialStep++; if (tutorialStep < tutorialElements.length) showTutorialStep(tutorialStep); else closeTutorial(); });
+  document.getElementById('tutSkip').addEventListener('click', closeTutorial);
+
+  // =============================================================
+  // 10. EVENTS & INIT
+  // =============================================================
+  langSelect.addEventListener('change', (e) => { currentLang = e.target.value; updateUI(); });
+
+  function openNameModal() {
+    document.getElementById('nameModal').classList.add('active');
+    document.getElementById('firstNameInput').value = localStorage.getItem('farmerFirstName') || '';
+  }
+  document.getElementById('saveNameBtn').addEventListener('click', () => {
+    const first = document.getElementById('firstNameInput').value.trim();
+    if (first) {
+      setFarmerName(first);
+      document.getElementById('nameModal').classList.remove('active');
+      updateUI();
+      if (!localStorage.getItem('kisaanTutorialShown')) { setTimeout(() => { tutorialStep = 0; showTutorialStep(0); }, 500); }
+    } else alert('Please enter your First Name.');
+  });
+  document.getElementById('editNameBtn').addEventListener('click', openNameModal);
+
+  refreshBtn.addEventListener('click', () => {
+    if (selectedLat && selectedLng) { statusText.innerText = 'Refreshing... (ECMWF)'; fetchWeather(selectedLat, selectedLng); } 
+    else { statusText.innerText = '⚠️ Search a city first.'; }
+  });
+
+  searchBtn.addEventListener('click', () => { const q = cityInput.value.trim(); if (q) searchCity(q); else cityStatus.innerText = getLangData().ui.cityStatusHint; });
+  cityInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') searchBtn.click(); });
+  micBtn.addEventListener('click', startVoice);
+  analyzeBtn.addEventListener('click', generateAdvice);
+
+  window.addEventListener('load', () => {
+    const first = localStorage.getItem('farmerFirstName');
+    if (!first) openNameModal();
+    else { farmerFirstName = first; updateUI(); if (!localStorage.getItem('kisaanTutorialShown')) { setTimeout(() => { tutorialStep = 0; showTutorialStep(0); }, 600); } }
+    cityStatus.innerText = getLangData().ui.cityStatusHint;
+    statusText.innerText = getLangData().ui.statusWaiting;
+  });
+
+  window.addEventListener('resize', () => {
+    if (document.getElementById('tutorialOverlay').classList.contains('active')) { showTutorialStep(tutorialStep); }
+  });
+
+  if ('serviceWorker' in navigator) console.log('⏳ PWA ready.');
+</script>
+</body>
+</html>
